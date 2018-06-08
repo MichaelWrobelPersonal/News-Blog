@@ -1,6 +1,6 @@
 // Dependencies
 var express = require("express");
-//var mongojs = require("mongojs");
+var mongojs = require("mongojs");
 var bodyParser = require("body-parser");
 var logger = require("morgan");
 var mongoose = require("mongoose");
@@ -36,33 +36,33 @@ var routes = require("./routes");
 
 // Database configuration
 var databaseUrl = process.env.MONGODB_URI || 'mongodb://localhost/MongoHeadlines';
-var collections = ["notes"];
+var collections = ["articles","notes"];
 
 mongoose.Promise = Promise;
 mongoose.connect(databaseUrl);
 
-//// Hook mongojs config to db variable
-//var db = null;
-//if(process.env.MONGODB_URI) {
-//  // mongoose.connect(process.envMONGODB_URI);
-//    db = mongojs(process.env.MONGODB_URI, collections);
-//}
-//else // local connection
-//{
-//  // mongooose.connect(databaseUrl); 
-//    db = mongojs(databaseUrl, collections);  
-//}
+// Hook mongojs config to db variable
+var dbs = null;
+if(process.env.MONGODB_URI) {
+  // mongoose.connect(process.envMONGODB_URI);
+    dbs = mongojs(process.env.MONGODB_URI, collections);
+}
+else // local connection
+{
+  // mongooose.connect(databaseUrl); 
+    dbs = mongojs(databaseUrl, collections);  
+}
 
 // var db = mongooose.connection
 
 // Log any mongojs errors to console
-//db.on("error", function(error) {
-//  console.log("Database Error:", error);
-//});
+dbs.on("error", function(error) {
+  console.log("Database Error:", error);
+});
 
-//db.once('open', function() {
-//  console.log('mongooose connection sucessful.');
-//});
+dbs.once('open', function() {
+  console.log('mongooose connection sucessful.');
+});
 
 // Routes
 // ======
@@ -78,6 +78,7 @@ app.get("/scrape", function(req, res) {
   // First, we grab the body of the html with request
   axios.get("http://www.newsweek.com/").then(function(response) {
     // Then, we load that into cheerio and save it to $ for a shorthand selector
+  //  console.log("Newsweek response data: " +response.data)
     var $ = cheerio.load(response.data);
 
     // Now, we grab every article tag, and do the following:
@@ -87,15 +88,20 @@ app.get("/scrape", function(req, res) {
 
       // Add the text and href of every link, and save them as properties of the result object
       result.title = $(this)
-        .children("a")
+        .children("h3")
         .text();
       result.summary =$(this)
         .children("div.summary")
         .text();
       result.link = $(this)
-        .children("a")
-        .attr("href");
+        .children('h3').children('a')
+        .attr('href');
 
+    // console.log("cheerio result...\n   title: " + result.title + "\n   summary: " + result.summary + "\n    link: " + result.link)
+
+
+      if (result.title != "")
+      {
       // Create a new Article using the `result` object built from scraping
       db.Article.create(result)
         .then(function(dbArticle) {
@@ -106,6 +112,7 @@ app.get("/scrape", function(req, res) {
           // If an error occurred, send it to the client
           return res.json(err);
         });
+      }
     });
 
     // If we were able to successfully scrape and save an Article, send a message to the client
@@ -170,7 +177,7 @@ app.post("/articles/:id", function(req, res) {
 app.post("/submit", function(req, res) {
   console.log(req.body);
   // Insert the note into the notes collection
-  db.notes.insert(req.body, function(error, saved) {
+  dbs.notes.insert(req.body, function(error, saved) {
     // Log any errors
     if (error) {
       console.log(error);
@@ -186,7 +193,7 @@ app.post("/submit", function(req, res) {
 // Retrieve results from mongo
 app.get("/all", function(req, res) {
   // Find all notes in the notes collection
-  db.notes.find({}, function(error, found) {
+  dbs.notes.find({}, function(error, found) {
     // Log any errors
     if (error) {
       console.log(error);
@@ -205,7 +212,7 @@ app.get("/find/:id", function(req, res) {
   // as (mongojs.ObjectId(IdYouWantToFind))
 
   // Find just one result in the notes collection
-  db.notes.findOne(
+  dbs.notes.findOne(
     {
       // Using the id in the url
       _id: mongojs.ObjectId(req.params.id)
@@ -232,7 +239,7 @@ app.post("/update/:id", function(req, res) {
   // as (mongojs.ObjectId(IdYouWantToFind))
 
   // Update the note that matches the object id
-  db.notes.update(
+  dbs.notes.update(
     {
       _id: mongojs.ObjectId(req.params.id)
     },
@@ -264,7 +271,7 @@ app.post("/update/:id", function(req, res) {
 // Delete One from the DB
 app.get("/delete/:id", function(req, res) {
   // Remove a note using the objectID
-  db.notes.remove(
+  dbs.notes.remove(
     {
       _id: mongojs.ObjectID(req.params.id)
     },
@@ -286,8 +293,24 @@ app.get("/delete/:id", function(req, res) {
 
 // Clear the DB
 app.get("/clearall", function(req, res) {
+
+ // Remove every note from the Articles collection
+ dbs.articles.remove({}, function(error, response) {
+    // Log any errors to the console
+    if (error) {
+      console.log(error);
+      res.send(error);
+    }
+    else {
+      // Otherwise, send the mongojs response to the browser
+      // This will fire off the success function of the ajax request
+      console.log(response);
+      res.send(response);
+    }
+  });
+
   // Remove every note from the notes collection
-  db.notes.remove({}, function(error, response) {
+  dbs.notes.remove({}, function(error, response) {
     // Log any errors to the console
     if (error) {
       console.log(error);
