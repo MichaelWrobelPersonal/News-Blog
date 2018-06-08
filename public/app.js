@@ -8,7 +8,10 @@ $.getJSON("/articles", function(data) {
   // For each one
   for (var i = 0; i < data.length; i++) {
     // Display the apropos information on the page
-    $("#articles").append("<p data-id='" + data[i]._id + "'>" + data[i].title +  "<br />" + data[i].summary + "<br />" + data[i].link + "</p>");
+    $("#articles").append("<p data-id='" + data[i]._id + "'>"
+                                       + "<strong>" + data[i].title +  "<br /></strong>"
+                                       + data[i].summary + "<br />");
+//                                       + data[i].link + "</p>");
   }
 });
 
@@ -30,13 +33,18 @@ $(document).on("click", "p", function() {
       console.log(data);
       // The title of the article
       $("#notes").append("<h2>" + data.title + "</h2>");
-      // An input to enter a new title
+      // The summary of the article
+      $("#notes").append("<h3>" + data.summary + "</h3>");
+      // The link to the full article
+      $("#notes").append("<a " + "href='" + data.link + "'>See the full article</a><br /><br />");
+          
+     // An input to enter a new note title
+
+      $("#notes").append("<label>Title</label>");
       $("#notes").append("<input id='titleinput' name='title' >");
-     // The title of the article
-     $("#notes").append("<h3>" + data.summary + "</h3>");
-     // An input to enter a new title
-     $("#notes").append("<input id='summaryinput' name='summary' >");
       // A textarea to add a new note body
+  
+      $("#notes").append("<label>Comment</label>");
       $("#notes").append("<textarea id='bodyinput' name='body'></textarea>");
       // A button to submit a new note, with the id of the article saved to it
       $("#notes").append("<button data-id='" + data._id + "' id='savenote'>Save Note</button>");

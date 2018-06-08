@@ -99,7 +99,7 @@ app.get("/scrape", function(req, res) {
 
     // console.log("cheerio result...\n   title: " + result.title + "\n   summary: " + result.summary + "\n    link: " + result.link)
 
-
+      // Toss out any empty articles
       if (result.title != "")
       {
       // Create a new Article using the `result` object built from scraping
