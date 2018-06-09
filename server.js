@@ -44,16 +44,12 @@ mongoose.connect(databaseUrl);
 // Hook mongojs config to db variable
 var dbs = null;
 if(process.env.MONGODB_URI) {
-  // mongoose.connect(process.envMONGODB_URI);
     dbs = mongojs(process.env.MONGODB_URI, collections);
 }
 else // local connection
-{
-  // mongooose.connect(databaseUrl); 
+{ 
     dbs = mongojs(databaseUrl, collections);  
 }
-
-// var db = mongooose.connection
 
 // Log any mongojs errors to console
 dbs.on("error", function(error) {
@@ -93,7 +89,8 @@ app.get("/scrape", function(req, res) {
       result.summary =$(this)
         .children("div.summary")
         .text();
-      result.link = $(this)
+      
+      result.link = "http://www.newsweek.com" + $(this)
         .children('h3').children('a')
         .attr('href');
 
@@ -292,10 +289,50 @@ app.get("/delete/:id", function(req, res) {
 });
 
 // Clear the DB
+app.get("/cleararticles", function(req, res) {
+
+  // Remove every note from the Articles collection
+  dbs.articles.remove({}, function(error, response) {
+     // Log any errors to the console
+     if (error) {
+       console.log(error);
+       res.send(error);
+     }
+     else {
+       // Otherwise, send the mongojs response to the browser
+       // This will fire off the success function of the ajax request
+       console.log(response);
+       res.send(response);
+     }
+  });
+});
+
+ 
+// Clear the DB
+app.get("/clearnotes", function(req, res) {
+
+   // Remove every note from the notes collection
+   dbs.notes.remove({}, function(err, reply) {
+     // Log any errors to the console
+     if (err) {
+       console.log(err);
+       res.send(err);
+     }
+     else {
+       // Otherwise, send the mongojs response to the browser
+       // This will fire off the success function of the ajax request
+       console.log(reply);
+       res.send(reply);
+     }
+  });
+});
+ 
+
+// Clear the DB
 app.get("/clearall", function(req, res) {
 
  // Remove every note from the Articles collection
- dbs.articles.remove({}, function(error, response) {
+  dbs.articles.remove({}, function(error, response) {
     // Log any errors to the console
     if (error) {
       console.log(error);
@@ -310,17 +347,17 @@ app.get("/clearall", function(req, res) {
   });
 
   // Remove every note from the notes collection
-  dbs.notes.remove({}, function(error, response) {
+  dbs.notes.remove({}, function(err, reply) {
     // Log any errors to the console
-    if (error) {
-      console.log(error);
-      res.send(error);
+    if (err) {
+      console.log(err);
+      res.send(err);
     }
     else {
       // Otherwise, send the mongojs response to the browser
       // This will fire off the success function of the ajax request
-      console.log(response);
-      res.send(response);
+      console.log(reply);
+      res.send(reply);
     }
   });
 });
