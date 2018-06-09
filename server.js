@@ -12,7 +12,7 @@ var db = require("./models");
 //var route = require("./routes");
 
 // Other 
-var PORT = 3000;
+var PORT = process.env.PORT || 3000;
 
 // Initialize
 var app = express();
