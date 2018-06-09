@@ -39,15 +39,16 @@ var databaseUrl = process.env.MONGODB_URI || 'mongodb://localhost/MongoHeadlines
 var collections = ["articles","notes"];
 
 mongoose.Promise = Promise;
-mongoose.connect(databaseUrl);
 
 // Hook mongojs config to db variable
 var dbs = null;
 if(process.env.MONGODB_URI) {
+    mongoose.connect(process.env.MONGODB_URI);
     dbs = mongojs(process.env.MONGODB_URI, collections);
 }
 else // local connection
 { 
+    mongoose.connect(databaseUrl);
     dbs = mongojs(databaseUrl, collections);  
 }
 
