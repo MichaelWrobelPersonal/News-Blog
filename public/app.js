@@ -1,7 +1,7 @@
 /* ===================== *
 
 * ====================== */
-$("#get-the-news").on("click"),function(event) {
+$("#get-the-news").on("click",function(event) {
   // Empty the notes from the articles section
   $("articles").empty();
 
@@ -31,7 +31,7 @@ $("#get-the-news").on("click"),function(event) {
       }); 
     });
   });
-};
+});
 /* ==================== *
  * Articles
  * front-end

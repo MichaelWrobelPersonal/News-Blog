@@ -189,7 +189,8 @@ app.post("/submit", function(req, res) {
 });
 
 // Retrieve results from mongo
-app.get("/all", function(req, res) {
+app.get("/all/", function(req, res) {
+  console.log('/all/ route called');
   // Find all notes in the notes collection
   dbs.notes.find({}, function(error, found) {
     // Log any errors
