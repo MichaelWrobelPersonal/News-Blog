@@ -7,6 +7,9 @@ A site for gathering news articles to which users can post a comment on the news
 # Deployed site
 [News-Blog](https://sheltered-oasis-84271.herokuapp.com/)
 
+# Author
+Michael Wrobel
+
 # Technology Details
 
 The site utilizes the 'Cheerio' web-scrapper API to scrape articles from the Newsweek website.  MongoDB/Mongoose is used to manage the collected data along with user review information.
